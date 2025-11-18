@@ -1,0 +1,54 @@
+#cloud-config
+autoinstall:
+  version: 1
+  # interactive-sections:  # Install groups listed here will wait for user input
+  #  - storage
+  storage:  # This should set the interactive (lvm set) default
+    layout: # Comment out this section and uncomment out the lines 4 and 5 to make it interactive,  
+      name: lvm # This is a destructive process, don't run this unless you do not care about data.
+      match:
+        size: largest
+  # Customize to your needs 
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  timezone: America/New_York
+  identity:
+    # you can run 'sudo apt-get install whois'
+    # 
+    hostname: ubuntu-new-server
+    password: "$6$.6snyHi.Tcf/Yc/3$KCEM3b0mhRw/HioNSa7pwI3BRcpW1xj.nEsewOaDvEjMEgMrLmNanR748xSRUllInA6Qe.lVGi5/IaI6Is6gs/"
+    username: useradmin
+    #ssh_authorized_keys: [ <your .pub key> ]
+  #proxy: http://proxy.server:port/
+  ssh:
+    # I would recommend setting this to use ssh keys by default in a production configuration
+    allow-pw: true
+    install-server: true
+    allow_public_ssh_keys: true
+    disable_root: true
+  apt:
+    primary:
+      - arches: [default]
+        uri: http://us.archive.ubuntu.com/ubuntu/
+  packages: 
+    - build-essential
+    - vim
+    - htop
+    - dkms
+    - iftop
+    - iotop
+    - net-tools
+  package_update: true
+  package_upgrade: true
+  late-commands:
+    # move existing config out of the way
+    # Create a new netplan and enable it
+    - curtin in-target --target /target netplan generate
+    - curtin in-target --target /target netplan apply
+  user-data: # Commands here run during first boot (cannot be interactive)
+   runcmd: # currently set to expand the largest disk to take the full disk.
+     - [lvextend, -l, +100%FREE,  /dev/ubuntu-vg/ubuntu-lv]
+     - [resize2fs, /dev/mapper/ubuntu--vg-ubuntu--lv]
+     - [apt, update]
+     - [apt, upgrade, --yes]

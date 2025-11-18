@@ -1,0 +1,57 @@
+#cloud-config
+autoinstall:
+  version: 1
+  # interactive-sections:  # Install groups listed here will wait for user input
+  #  - storage
+  storage:  # This should set the interactive (lvm set) default
+    layout:
+      name: lvm
+      match:
+        size: largest  
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  #set your Timezone!!
+  timezone: America/New_York
+  identity:
+    hostname: ubuntu-new-server
+    # pwd is pleasechange!
+    password: "$5$31ek9O.FHH2neOm3$7GBZO5/QxZiIdqJFaNC85FUM0xETZw8ohq1xV.Jx4r9"
+    username: useradmin
+    lock_passwd: false
+    chpasswd: { expire: False }
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: adm, sudo
+    ssh_authorized_keys: [ ssh-ed25519 pubkey ]
+  #proxy: http://proxy:port/
+  ssh:
+    allow-pw: true
+    install-server: true
+    allow_public_ssh_keys: true
+    disable_root: true
+  apt:
+    primary:
+      - arches: [default]
+        uri: http://us.archive.ubuntu.com/ubuntu/
+  packages: 
+    - build-essential
+    - vim
+    - htop
+    - dkms
+    - iftop
+    - iotop
+    - net-tools
+    - flatpak
+  package_update: true
+  package_upgrade: true
+  late-commands:
+    # move existing config out of the way
+    # Create a new netplan and enable it
+    - curtin in-target --target /target netplan generate
+    - curtin in-target --target /target netplan apply
+  user-data: # Commands here run during first boot (cannot be interactive)
+   runcmd:
+     - [lvextend, -l, +100%FREE,  /dev/ubuntu-vg/ubuntu-lv]
+     - [resize2fs, /dev/mapper/ubuntu--vg-ubuntu--lv]
+     - [apt, update]
+     - [apt, upgrade, --yes]

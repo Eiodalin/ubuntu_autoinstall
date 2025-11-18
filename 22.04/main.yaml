@@ -1,0 +1,76 @@
+---
+  - hosts: localhost
+    tasks:
+    - name: Set grub boot loader settings
+      ansible.builtin.copy:
+        src: templates/grub.cfg.j2
+        dest: source-files/boot/grub/grub.cfg
+        mode: '0744'
+    
+    # Creates the built-in folder for user-data,meta-data
+    - name: Create directory source-files/server
+      ansible.builtin.file:
+        path: source-files/server
+        mode: '0744'
+        state: directory
+
+    - name: copy user-data
+      ansible.builtin.copy:
+        src: templates/user-data
+        dest: source-files/server
+        mode: '0700'
+
+    - name: copy meta-data
+      ansible.builtin.copy:
+        src: templates/meta-data
+        dest: source-files/server
+        mode: '0700'
+
+    - name: get xorriso data to do build
+      ansible.builtin.command: 'xorriso -indev jammy.iso -report_el_torito as_mkisofs'
+      register: xorriso_info
+    - name: get xorriso data to do build
+      ansible.builtin.command: 'xorriso -indev jammy.iso -report_el_torito as_mkisofs'
+      register: xorriso_info
+    
+    - name: testing output
+      ansible.builtin.debug:
+        msg: "{{ xorriso_info.stdout_lines }}"
+
+    - name: Check if the build.sh exists
+      ansible.builtin.stat:
+        path: ./build.sh
+      register: buildsh
+
+    - name: Clean build.sh
+      ansible.builtin.file:
+        path: ./build.sh
+        state: absent
+
+    - name: Ensure the target build.sh exists if it is not there
+      ansible.builtin.file:
+        path: ./build.sh
+        state: touch
+        mode: '0777'
+
+    - name: Generating build.sh
+      ansible.builtin.blockinfile:
+        dest: ./build.sh
+        marker: ''
+        block: | 
+          #!/bin/bash
+          cd source-files
+          xorriso -as mkisofs -r {{ xorriso_info.stdout_lines.0 }} -o ../ubuntu-22.04-autoinstall.iso \
+          --grub2-mbr ../BOOT/1-Boot-NoEmul.img {{ xorriso_info.stdout_lines.6 }} \
+          -append_partition 2 28732ac11ff8d211ba4b00a0c93ec93b ../BOOT/2-Boot-NoEmul.img \
+          {{ xorriso_info.stdout_lines.8 }} {{ xorriso_info.stdout_lines.9 }} \
+          {{ xorriso_info.stdout_lines.10 }} {{ xorriso_info.stdout_lines.11 }} \
+          {{ xorriso_info.stdout_lines.12 }} {{ xorriso_info.stdout_lines.13 }} \
+          {{ xorriso_info.stdout_lines.14 }} {{ xorriso_info.stdout_lines.15 }} \
+          {{ xorriso_info.stdout_lines.16 }} -e '--interval:appended_partition_2:::' \
+          -no-emul-boot \
+          .
+        backup: no
+
+        
+
