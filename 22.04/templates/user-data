@@ -14,10 +14,10 @@ autoinstall:
     layout: us
   timezone: America/New_York
   identity:
-    # you can run 'sudo apt-get install whois'
-    # 
+    # you can run 'sudo apt-get install whois' and then run:
+    # echo 'pleasechange!' | mkpasswd -m sha-512 -s
     hostname: ubuntu-new-server
-    password: "$6$.6snyHi.Tcf/Yc/3$KCEM3b0mhRw/HioNSa7pwI3BRcpW1xj.nEsewOaDvEjMEgMrLmNanR748xSRUllInA6Qe.lVGi5/IaI6Is6gs/"
+    password: "$6$vRZ1.fQPb4ZDvMrN$lwfKsQoW7KBm7mLwwKHB4cGJ5hTw6AiW8aDZoAdwGu0ikfJ8PcyjDApH4Q2rCLqbH0UFSklAFNW4umhpEI3U/0"
     username: useradmin
     #ssh_authorized_keys: [ <your .pub key> ]
   #proxy: http://proxy.server:port/
