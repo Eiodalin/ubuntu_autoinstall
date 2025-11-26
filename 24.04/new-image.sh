@@ -9,7 +9,7 @@ directory_path="./source-files"
 # Set for noble
 FILE_NAME="noble.iso"
 ubuntu_version="24.04"
-ubuntu_source='https://releases.ubuntu.com/24.04/ubuntu-24.04.3-live-server-amd64.iso'
+ubuntu_source='https://releases.ubuntu.com/noble/ubuntu-24.04.3-live-server-amd64.iso'
 # Initialize a variable to track if '--auto' is found
 AUTO_FLAG=false
 
@@ -38,13 +38,13 @@ else
     sudo apt install wget 
 fi
 
-download_noble(){
+download_iso(){
     if [ -n "$http_proxy" ]; then
         echo "The HTTP proxy is set: $http_proxy"
-        wget -O $FILE_NAME -e use_proxy=yes http_proxy=$http_proxy $ubuntu_source
+        wget -O $FILE_NAME -e use_proxy=yes http_proxy="$http_proxy" "$ubuntu_source"
     else
         echo "The HTTP_PROXY variable is not set."
-        wget $ubuntu_source
+        wget -O $FILE_NAME "$ubuntu_source"
     fi
 }
 
@@ -53,10 +53,10 @@ if [ -e "$FILE_NAME" ]; then
     # Use find to locate files older than 5 days and remove them
     find "./" -type f -name "$FILE_NAME" -mtime +5 -exec rm {} \;
     echo "Older files removed."
-    download_noble
+    download_iso
 else
     echo "File not found: $FILE_NAME"
-    download_noble
+    download_iso
 fi
 
 prompt_yes_no() {
@@ -106,7 +106,7 @@ else
     sudo apt install 7zip 
 fi
 #extract das ISO!
-7z -y x noble.iso -osource-files
+7z -y x $FILE_NAME -osource-files
 
 #move the boot file up a level and change the name to make it easier to script with 
 mv  source-files/'[BOOT]' ./BOOT
