@@ -1,14 +1,17 @@
 #cloud-config
+bootcmd:
+ - sed -i 's/$/ autoinstall/g' /tmp/cmdline
+ - mount -n --bind -o ro /tmp/cmdline /proc/cmdline
 autoinstall:
   version: 1
   # interactive-sections:  # Install groups listed here will wait for user input
   #  - storage
   storage:  # This should set the interactive (lvm set) default
-    layout: # Comment out this section and uncomment out the lines 4 and 5 to make it interactive,  
+    layout: # Comment out this section and uncomment out the lines 4 and 5 to make it interactive,
       name: lvm # This is a destructive process, don't run this unless you do not care about data.
       match:
         size: largest
-  # Customize to your needs 
+  # Customize to your needs
   locale: en_US.UTF-8
   keyboard:
     layout: us
@@ -17,7 +20,7 @@ autoinstall:
     # you can run 'sudo apt-get install whois' and then run:
     # echo 'pleasechange!' | mkpasswd -m sha-512 -s
     hostname: ubuntu-new-server
-    password: "$6$vRZ1.fQPb4ZDvMrN$lwfKsQoW7KBm7mLwwKHB4cGJ5hTw6AiW8aDZoAdwGu0ikfJ8PcyjDApH4Q2rCLqbH0UFSklAFNW4umhpEI3U/0"
+    password: $6$vRZ1.fQPb4ZDvMrN$lwfKsQoW7KBm7mLwwKHB4cGJ5hTw6AiW8aDZoAdwGu0ikfJ8PcyjDApH4Q2rCLqbH0UFSklAFNW4umhpEI3U/0
     username: useradmin
     #ssh_authorized_keys: [ <your .pub key> ]
   #proxy: http://proxy.server:port/
@@ -31,7 +34,7 @@ autoinstall:
     primary:
       - arches: [default]
         uri: http://us.archive.ubuntu.com/ubuntu/
-  packages: 
+  packages:
     - build-essential
     - vim
     - htop
